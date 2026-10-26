@@ -1,3 +1,4 @@
+# Trigger conversion on pull request opening.
 from pathlib import Path
 import re, subprocess
 from urllib.parse import quote
