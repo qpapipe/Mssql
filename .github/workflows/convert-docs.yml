@@ -1,6 +1,13 @@
 name: One-time Word to Markdown conversion
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/convert-docs.yml'
+      - 'scripts/convert_docx_to_md.py'
+      - '**/*.docx'
   push:
     branches:
       - docs/convert-word-to-markdown
@@ -16,10 +23,12 @@ permissions:
 jobs:
   convert:
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -39,4 +48,4 @@ jobs:
           git add -A
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Convert Word documents to Markdown and remove originals [converted]"
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          git push origin "HEAD:$TARGET_BRANCH"
