@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - docs/convert-word-to-markdown
+      - main
     paths:
       - '.github/workflows/convert-docs.yml'
       - 'scripts/convert_docx_to_md.py'
