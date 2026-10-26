@@ -1,0 +1,42 @@
+name: One-time Word to Markdown conversion
+
+on:
+  push:
+    branches:
+      - docs/convert-word-to-markdown
+      - main
+    paths:
+      - '.github/workflows/convert-docs.yml'
+      - 'scripts/convert_docx_to_md.py'
+      - '**/*.docx'
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Word and OCR tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-rus
+          python -m pip install --upgrade pip
+          python -m pip install python-docx
+      - name: Convert and validate
+        run: python scripts/convert_docx_to_md.py
+      - name: Commit output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Convert Word documents to Markdown and remove originals [converted]"
+          git push origin "HEAD:$GITHUB_REF_NAME"
